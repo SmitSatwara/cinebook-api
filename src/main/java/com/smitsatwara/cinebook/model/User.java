@@ -14,18 +14,18 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long userId;
+    private Long userId;
     @Column(nullable = false)
-    String userName;
+    private String userName;
     @Column(nullable = false, unique = true)
-    String email;
+    private String email;
     @Column(nullable = false)
-    String password;
+    private String password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    UserRole role;
+    private UserRole role;
     @Column(nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
 
     @PrePersist
