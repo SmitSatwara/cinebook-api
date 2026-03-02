@@ -6,6 +6,8 @@ import com.smitsatwara.cinebook.repository.TheatreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TheatreService {
@@ -19,7 +21,14 @@ public class TheatreService {
         return  theatreRepository.save(theatre);
     }
 
-    public Theatre getTheatreByNameAndCity(String name, String city) {
+    public List<Theatre> getAllTheatres() {
+        return theatreRepository.findAll();
+    }
+    public List<Theatre> getTheatresByCity(String city){
+        return theatreRepository.findByCity(city);
+    }
+
+    public Theatre getTheatresByNameAndCity(String name, String city) {
         return theatreRepository.findByNameAndCity(name, city)
                 .orElseThrow(() -> new RuntimeException("Theatre not found with name: " + name + " and city: " + city));
     }
