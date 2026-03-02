@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/movies/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/movies/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/theatres/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/theatres/**").authenticated()
                 .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
