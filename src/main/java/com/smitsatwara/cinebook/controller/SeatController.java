@@ -21,8 +21,8 @@ public class SeatController {
         return ResponseEntity.ok(seatService.addSeat(seatRequest));
     }
     @GetMapping("/screen/{screenId}")
-    public List<Seat> getSeatsByScreenId(@PathVariable Long screenId){
-        return seatService.getSeatsByScreenId(screenId);
+    public ResponseEntity<List<Seat>> getSeatsByScreenId(@PathVariable Long screenId){
+        return ResponseEntity.ok(seatService.getSeatsByScreenId(screenId));
     }
 
 }

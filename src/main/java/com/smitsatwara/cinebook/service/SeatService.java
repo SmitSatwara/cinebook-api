@@ -22,7 +22,7 @@ public class SeatService {
                 .orElseThrow(() -> new RuntimeException("Screen not found with id: " + seatRequest.getScreenId()));
         Seat seat = new Seat();
         seat.setSeatNumber(seatRequest.getSeatNumber());
-        seat.setSeatType(SeatType.valueOf(seatRequest.getSeatType()));
+        seat.setSeatType(seatRequest.getSeatType());
         seat.setScreen(screen);
         return seatRepository.save(seat);
     }

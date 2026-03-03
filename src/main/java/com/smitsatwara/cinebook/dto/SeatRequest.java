@@ -1,5 +1,6 @@
 package com.smitsatwara.cinebook.dto;
 
+import com.smitsatwara.cinebook.model.SeatType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ public class SeatRequest {
     @NotBlank
     private String seatNumber;
     @NotBlank
-    private String seatType;
+    private SeatType seatType;
     @NotNull
     private Long screenId;
 }
