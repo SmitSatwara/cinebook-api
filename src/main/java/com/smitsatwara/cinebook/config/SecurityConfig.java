@@ -20,36 +20,40 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/movies/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/movies/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/theatres/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/theatres/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/screens/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/screens/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/shows/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/shows/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/seats/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/seats/**").authenticated()
-                .anyRequest().authenticated())
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/movies/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/movies/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/theatres/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/theatres/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/screens/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/screens/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/shows/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/shows/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/seats/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/seats/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/show-seats/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/show-seats/**").authenticated()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

@@ -2,6 +2,7 @@ package com.smitsatwara.cinebook.controller;
 
 import com.smitsatwara.cinebook.dto.ShowRequest;
 import com.smitsatwara.cinebook.model.Show;
+import com.smitsatwara.cinebook.model.ShowSeat;
 import com.smitsatwara.cinebook.service.ShowService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,19 @@ public class ShowController {
     public ResponseEntity<Show> addShow(@RequestBody @Valid ShowRequest showRequest) {
         return ResponseEntity.ok(showService.addShow(showRequest));
     }
+
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<List<Show>> getShowByMovie(@PathVariable Long movieId, @RequestParam LocalDate showDate) {
         return ResponseEntity.ok(showService.getShowByMovie(movieId, showDate));
     }
+
     @GetMapping("/screen/{screenId}")
-    public ResponseEntity<List<Show>> getShowByScreen(@PathVariable Long screenId){
+    public ResponseEntity<List<Show>> getShowByScreen(@PathVariable Long screenId) {
         return ResponseEntity.ok(showService.getShowByScreen(screenId));
+    }
+
+    @GetMapping("/{showId}/seats")
+    public ResponseEntity<List<ShowSeat>> getShowSeats(@PathVariable Long showId){
+        return ResponseEntity.ok(showService.getShowSeats(showId));
     }
 }
