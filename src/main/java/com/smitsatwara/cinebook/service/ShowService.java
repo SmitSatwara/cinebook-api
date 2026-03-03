@@ -32,15 +32,19 @@ public class ShowService {
         show.setPrice(showRequest.getPrice());
 
         Show savedShow= showRepository.save(show);
-        //create show seats for the show
         List<Seat> seats = seatRepository.findByScreenScreenId(screen.getScreenId());
-        for (Seat seat : seats) {
-            ShowSeat showSeat = new ShowSeat();
-            showSeat.setShow(savedShow);
-            showSeat.setSeat(seat);
-            showSeat.setStatus(SeatStatus.AVAILABLE);
-            showSeatRepository.save(showSeat);
-        }
+        List<ShowSeat> showSeats = seats.stream()
+                .map(seat -> {
+                    ShowSeat showSeat = new ShowSeat();
+                    showSeat.setShow(savedShow);
+                    showSeat.setSeat(seat);
+                    showSeat.setStatus(SeatStatus.AVAILABLE);
+                    return showSeat;
+                }
+
+                )
+                .toList();
+        showSeatRepository.saveAll(showSeats);
         return savedShow;
 
     }

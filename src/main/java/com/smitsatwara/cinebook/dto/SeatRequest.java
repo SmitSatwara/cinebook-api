@@ -12,7 +12,7 @@ import lombok.Setter;
 public class SeatRequest {
     @NotBlank
     private String seatNumber;
-    @NotBlank
+    @NotNull
     private SeatType seatType;
     @NotNull
     private Long screenId;
