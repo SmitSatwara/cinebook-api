@@ -24,17 +24,22 @@ public class ShowController {
     }
 
     @GetMapping("/movie/{movieId}")
-    public ResponseEntity<List<Show>> getShowByMovie(@PathVariable Long movieId, @RequestParam LocalDate showDate) {
-        return ResponseEntity.ok(showService.getShowByMovie(movieId, showDate));
+    public ResponseEntity<List<Show>> getShowsByMovie(@PathVariable Long movieId, @RequestParam LocalDate showDate) {
+        return ResponseEntity.ok(showService.getShowsByMovie(movieId, showDate));
     }
 
     @GetMapping("/screen/{screenId}")
-    public ResponseEntity<List<Show>> getShowByScreen(@PathVariable Long screenId) {
-        return ResponseEntity.ok(showService.getShowByScreen(screenId));
+    public ResponseEntity<List<Show>> getShowsByScreen(@PathVariable Long screenId) {
+        return ResponseEntity.ok(showService.getShowsByScreen(screenId));
     }
 
     @GetMapping("/{showId}/seats")
     public ResponseEntity<List<ShowSeat>> getShowSeats(@PathVariable Long showId){
         return ResponseEntity.ok(showService.getShowSeats(showId));
     }
+    @GetMapping("/city/{city}/movie/{movieId}")
+    public ResponseEntity<List<Show>> getShowsByCityAndMovieAndDate(@PathVariable String city, @PathVariable Long movieId, @RequestParam LocalDate showDate) {
+        return ResponseEntity.ok(showService.getShowsByCityAndMovieAndDate(city, movieId, showDate));
+    }
+
 }

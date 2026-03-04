@@ -49,15 +49,19 @@ public class ShowService {
 
     }
     //get all shows for a movie
-    public List<Show> getShowByMovie(Long movieId, LocalDate showDate) {
+    public List<Show> getShowsByMovie(Long movieId, LocalDate showDate) {
         return showRepository.findByMovieMovieIdAndShowDate(movieId,showDate);
     }
     //get all shows for a screen
-    public List<Show> getShowByScreen(Long screenId) {
+    public List<Show> getShowsByScreen(Long screenId) {
         return showRepository.findByScreenScreenId(screenId);
     }
 
     public List<ShowSeat> getShowSeats(Long showId) {
         return showSeatRepository.findByShowShowId(showId);
+    }
+
+    public List<Show> getShowsByCityAndMovieAndDate(String city, Long movieId, LocalDate showDate) {
+        return showRepository.findByScreenTheatreCityAndMovieMovieIdAndShowDate(city, movieId, showDate);
     }
 }
