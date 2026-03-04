@@ -8,6 +8,7 @@ import com.smitsatwara.cinebook.repository.ShowSeatRepository;
 import com.smitsatwara.cinebook.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ public class BookingService {
     private final ShowRepository showRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public Booking createBooking(BookingRequest bookingRequest, String email) {
         Show show = showRepository.findById(bookingRequest.getShowId())
                 .orElseThrow(() -> new RuntimeException("Show not found with id: " + bookingRequest.getShowId()));
@@ -57,7 +59,7 @@ public class BookingService {
 
         return bookingRepository.findByUserUserId(user.getUserId());
     }
-
+    @Transactional
     public Booking cancelBooking(Long bookingId, String email){
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));

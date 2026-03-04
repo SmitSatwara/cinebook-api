@@ -5,6 +5,7 @@ import com.smitsatwara.cinebook.model.*;
 import com.smitsatwara.cinebook.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,6 +20,7 @@ public class ShowService {
     private final SeatRepository seatRepository;
 
     //admin can create shows and auto create show seats for the show
+    @Transactional
     public Show addShow(ShowRequest showRequest) {
         Movie movie = movieRepository.findById(showRequest.getMovieId())
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + showRequest.getMovieId()));
