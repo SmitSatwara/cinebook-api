@@ -37,4 +37,12 @@ public class BookingController {
                 .getName();
         return ResponseEntity.ok(bookingService.getBookingByUser(userEmail));
     }
+
+    @PutMapping("/{bookingId}/cancel")
+    public ResponseEntity<Booking> cancelBooking(@PathVariable Long bookingId) {
+        String userEmail = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return ResponseEntity.ok(bookingService.cancelBooking(bookingId, userEmail));
+    }
 }

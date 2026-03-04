@@ -9,6 +9,7 @@ import com.smitsatwara.cinebook.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -57,5 +58,31 @@ public class BookingService {
         return bookingRepository.findByUserUserId(user.getUserId());
     }
 
+    public Booking cancelBooking(Long bookingId, String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
+        Booking booking = bookingRepository.findByBookingIdAndUserUserId(bookingId, user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId + " for user with email: " + email));
+
+        LocalDateTime showTime = LocalDateTime.of(booking.getShow().getShowDate(), booking.getShow().getShowTime());
+
+        if(LocalDateTime.now().isAfter(showTime.minusHours(24))) {
+            throw new RuntimeException("Bookings can only be cancelled at least 24 hours before the show time");
+        }
+
+        if(booking.getStatus()== BookingStatus.CANCELLED || booking.getStatus()== BookingStatus.PENDING) {
+            throw new RuntimeException("Only confirmed bookings can be cancelled");
+        }
+
+        showSeatRepository.findByShowShowId(booking.getShow().getShowId())
+                .stream()
+                .filter(showSeat -> showSeat.getStatus() == SeatStatus.BOOKED)
+                .forEach(showSeat -> {
+                    showSeat.setStatus(SeatStatus.AVAILABLE);
+                    showSeatRepository.save(showSeat);
+                });
+        booking.setStatus(BookingStatus.CANCELLED);
+        return bookingRepository.save(booking);
+    }
 }
