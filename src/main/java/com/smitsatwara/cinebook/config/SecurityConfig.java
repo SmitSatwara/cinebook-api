@@ -28,21 +28,34 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Movies
                         .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/movies/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/movies/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/movies/**").hasRole("ADMIN")
+
+                        // Theatres
                         .requestMatchers(HttpMethod.GET, "/api/theatres/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/theatres/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/theatres/**").hasRole("ADMIN")
+
+                        // Screens
                         .requestMatchers(HttpMethod.GET, "/api/screens/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/screens/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/shows/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/shows/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/screens/**").hasRole("ADMIN")
+
+                        // Seats
                         .requestMatchers(HttpMethod.GET, "/api/seats/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/seats/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/seats/**").hasRole("ADMIN")
+
+                        // Shows
+                        .requestMatchers(HttpMethod.GET, "/api/shows/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/shows/**").hasRole("ADMIN")
+
+                        // ShowSeats
                         .requestMatchers(HttpMethod.GET, "/api/show-seats/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/show-seats/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/show-seats/**").authenticated()
+
+                        // Bookings
                         .requestMatchers("/api/bookings/**").authenticated()
+
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
