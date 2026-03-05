@@ -23,6 +23,14 @@ public class ShowService {
     //admin can create shows and auto create show seats for the show
     @Transactional
     public Show addShow(ShowRequest showRequest) {
+
+        if(showRepository.findByScreenScreenIdAndShowDateAndShowTime(
+                showRequest.getScreenId(),
+                showRequest.getShowDate(),
+                showRequest.getShowTime()).isPresent()) {
+            throw new RuntimeException("Show already exists for the given screen, date and time");
+        }
+
         Movie movie = movieRepository.findById(showRequest.getMovieId())
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + showRequest.getMovieId()));
         Screen screen = screenRepository.findById(showRequest.getScreenId())

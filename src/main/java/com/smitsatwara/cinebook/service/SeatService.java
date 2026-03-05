@@ -3,7 +3,6 @@ package com.smitsatwara.cinebook.service;
 import com.smitsatwara.cinebook.dto.SeatRequest;
 import com.smitsatwara.cinebook.model.Screen;
 import com.smitsatwara.cinebook.model.Seat;
-import com.smitsatwara.cinebook.model.SeatType;
 import com.smitsatwara.cinebook.repository.ScreenRepository;
 import com.smitsatwara.cinebook.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
