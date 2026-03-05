@@ -1,31 +1,47 @@
 package com.smitsatwara.cinebook.service;
 
+import com.smitsatwara.cinebook.dto.ShowSeatResponse;
 import com.smitsatwara.cinebook.model.SeatStatus;
-import com.smitsatwara.cinebook.model.Show;
 import com.smitsatwara.cinebook.model.ShowSeat;
-import com.smitsatwara.cinebook.repository.SeatRepository;
-import com.smitsatwara.cinebook.repository.ShowRepository;
 import com.smitsatwara.cinebook.repository.ShowSeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ShowSeatService {
     private final ShowSeatRepository showSeatRepository;
-    private final ShowRepository showRepository;
-    private final SeatRepository seatRepository;
 
-    public List<ShowSeat> getShowSeats(Long showId) {
-        return showSeatRepository.findByShowShowId(showId);
+    public List<ShowSeatResponse> getShowSeats(Long showId) {
+        //need to as ShowSeatResponse as we dont want to expose the show and seat details in the response
+            return showSeatRepository.findByShowShowId(showId)
+                    .stream()
+                    .map(showSeat -> {
+                        ShowSeatResponse response = new ShowSeatResponse();
+                        response.setShowSeatId(showSeat.getShowSeatId());
+                        response.setSeatNumber(showSeat.getSeat().getSeatNumber());
+                        response.setSeatType(showSeat.getSeat().getSeatType());
+                        response.setPrice(showSeat.getPrice());
+                        response.setStatus(showSeat.getStatus());
+                        return response;
+                    }).toList();
     }
 
 
-    public List<ShowSeat> getAvailableSeats(Long showId) {
-        return showSeatRepository.findByShowShowIdAndStatus(showId, SeatStatus.AVAILABLE);
+    public List<ShowSeatResponse> getAvailableSeats(Long showId) {
+        return showSeatRepository.findByShowShowIdAndStatus(showId, SeatStatus.AVAILABLE)
+                .stream()
+                .map(showSeat -> {
+                    ShowSeatResponse response = new ShowSeatResponse();
+                    response.setShowSeatId(showSeat.getShowSeatId());
+                    response.setSeatNumber(showSeat.getSeat().getSeatNumber());
+                    response.setSeatType(showSeat.getSeat().getSeatType());
+                    response.setPrice(showSeat.getPrice());
+                    response.setStatus(showSeat.getStatus());
+                    return response;
+                }).toList();
     }
 
     public ShowSeat lockSeat(Long showId,Long seatId) {
