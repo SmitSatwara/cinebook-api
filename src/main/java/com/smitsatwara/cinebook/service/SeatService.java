@@ -18,8 +18,15 @@ public class SeatService {
     private final ScreenRepository screenRepository;
 
     public Seat addSeat(SeatRequest seatRequest) {
+
         Screen screen = screenRepository.findById(seatRequest.getScreenId())
                 .orElseThrow(() -> new RuntimeException("Screen not found with id: " + seatRequest.getScreenId()));
+        if(seatRepository.findBySeatNumberAndScreenScreenId(
+                seatRequest.getSeatNumber(),
+                seatRequest.getScreenId()).isPresent()) {
+            throw new RuntimeException("Seat " + seatRequest.getSeatNumber()
+                    + " already exists in this screen");
+        }
         Seat seat = new Seat();
         seat.setSeatNumber(seatRequest.getSeatNumber());
         seat.setSeatType(seatRequest.getSeatType());
@@ -27,7 +34,7 @@ public class SeatService {
         return seatRepository.save(seat);
     }
 
-    public List<Seat> getSeatsByScreenId(Long sceenId){
-        return seatRepository.findByScreenScreenId(sceenId);
+    public List<Seat> getSeatsByScreenId(Long screenId){
+        return seatRepository.findByScreenScreenId(screenId);
     }
 }
