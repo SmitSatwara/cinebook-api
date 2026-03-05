@@ -18,6 +18,11 @@ public class ScreenService {
 
     //add screen to theatre
     public Screen addScreen(ScreenRequest screenRequest) {
+        if(screenRepository.findByNameAndTheatreTheatreId(
+                screenRequest.getName(),
+                screenRequest.getTheatreId()).isPresent()) {
+            throw new RuntimeException("Screen already exists with name: " + screenRequest.getName() + " in theatre with id: " + screenRequest.getTheatreId());
+        }
         Screen screen = new Screen();
         Theatre theatre = theatreRepository.findById(screenRequest.getTheatreId())
                 .orElseThrow(() -> new RuntimeException("Theatre not found with id: " + screenRequest.getTheatreId()));
