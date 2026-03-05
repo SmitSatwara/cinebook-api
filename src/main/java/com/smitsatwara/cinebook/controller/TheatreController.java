@@ -29,7 +29,7 @@ public class TheatreController {
         return ResponseEntity.ok(theatreService.getTheatresByCity(city));
     }
     @GetMapping("/search")
-    public ResponseEntity<Theatre> getTheatreByNameAndCity(@RequestParam String name,@RequestParam String city) {
+    public ResponseEntity<List<Theatre>> getTheatreByNameAndCity(@RequestParam String name,@RequestParam String city) {
         return ResponseEntity.ok(theatreService.getTheatresByNameAndCity(name, city));
     }
 }

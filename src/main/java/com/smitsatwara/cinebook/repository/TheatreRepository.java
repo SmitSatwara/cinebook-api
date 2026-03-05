@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TheatreRepository extends JpaRepository<Theatre,Long> {
-    Optional<Theatre> findByNameAndCity(String name, String city);
+    List<Theatre> findByNameAndCity(String name, String city);
     List<Theatre> findByCity(String city);
+    Optional<Theatre> findByNameAndCityAndAddress(String name, String city, String address);
 }
