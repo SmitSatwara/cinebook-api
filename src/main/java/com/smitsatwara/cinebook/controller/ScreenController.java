@@ -1,7 +1,7 @@
 package com.smitsatwara.cinebook.controller;
 
 import com.smitsatwara.cinebook.dto.ScreenRequest;
-import com.smitsatwara.cinebook.model.Screen;
+import com.smitsatwara.cinebook.dto.ScreenResponse;
 import com.smitsatwara.cinebook.service.ScreenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,11 @@ public class ScreenController {
     private final ScreenService screenService;
 
     @PostMapping
-    public ResponseEntity<Screen> addScreen(@RequestBody @Valid ScreenRequest screenRequest) {
+    public ResponseEntity<ScreenResponse> addScreen(@RequestBody @Valid ScreenRequest screenRequest) {
         return ResponseEntity.ok(screenService.addScreen(screenRequest));
     }
     @GetMapping("/theatre/{theatreId}")
-    public ResponseEntity<List<Screen>> getScreensByTheatreId(@PathVariable Long theatreId) {
+    public ResponseEntity<List<ScreenResponse>> getScreensByTheatreId(@PathVariable Long theatreId) {
         return ResponseEntity.ok(screenService.getScreensByTheatreId(theatreId));
     }
 }
