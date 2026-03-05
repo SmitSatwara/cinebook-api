@@ -62,7 +62,6 @@ public class ShowService {
                 .toList();
         showSeatRepository.saveAll(showSeats);
         return savedShow;
-
     }
     //get all shows for a movie
     public List<Show> getShowsByMovie(Long movieId, LocalDate showDate) {
