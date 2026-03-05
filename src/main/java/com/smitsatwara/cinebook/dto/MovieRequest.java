@@ -1,5 +1,6 @@
 package com.smitsatwara.cinebook.dto;
 
+import com.smitsatwara.cinebook.model.Language;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -13,8 +14,8 @@ public class MovieRequest {
     private  String title;
     @NotBlank
     private String genre;
-    @NotBlank
-    private String language;
+    @NotNull
+    private Language language;
     @NotNull
     private Integer duration;
     private Double rating;

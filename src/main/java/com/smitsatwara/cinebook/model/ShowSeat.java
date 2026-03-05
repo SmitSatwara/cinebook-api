@@ -22,6 +22,11 @@ public class ShowSeat {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SeatStatus status;
+    @Column
+    private Double price;
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
 
 
 }

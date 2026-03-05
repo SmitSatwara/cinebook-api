@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -40,6 +41,11 @@ public class ShowService {
                     ShowSeat showSeat = new ShowSeat();
                     showSeat.setShow(savedShow);
                     showSeat.setSeat(seat);
+                    double multipliedPrice =show.getPrice()
+                            * seat.getSeatType().getMultiplier()
+                            * show.getMovie().getLanguage().getMultiplier()
+                            * getTimingMultiplier(show.getShowTime());
+                    showSeat.setPrice(multipliedPrice);
                     showSeat.setStatus(SeatStatus.AVAILABLE);
                     return showSeat;
                 }
@@ -65,5 +71,13 @@ public class ShowService {
 
     public List<Show> getShowsByCityAndMovieAndDate(String city, Long movieId, LocalDate showDate) {
         return showRepository.findByScreenTheatreCityAndMovieMovieIdAndShowDate(city, movieId, showDate);
+    }
+
+
+    private double getTimingMultiplier(LocalTime showTime) {
+        if (showTime.isBefore(LocalTime.of(12, 0))) return 0.8;  // Morning
+        if (showTime.isBefore(LocalTime.of(17, 0))) return 1.0;  // Afternoon
+        if (showTime.isBefore(LocalTime.of(21, 0))) return 1.2;  // Evening
+        return 1.5;                                               // Night
     }
 }

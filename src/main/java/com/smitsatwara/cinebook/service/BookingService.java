@@ -28,23 +28,28 @@ public class BookingService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
+        Booking booking = new Booking();
+        booking.setShow(show);
+        booking.setUser(user);
+        booking.setTotalAmount(0.0);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        Booking savedBooking =  bookingRepository.save(booking); // bookingId is generated after saving, so we need to save the booking first before updating show seats with booking reference
+
+        //now link the booked show seats to the booking
+        double totalPrice = 0.0;
         for(Long seatId : bookingRequest.getSeatIds()){
             ShowSeat showSeat = showSeatRepository.findByShowShowIdAndSeatSeatId(bookingRequest.getShowId(),seatId)
                     .orElseThrow(() -> new RuntimeException("Show seat not found for showId: " + bookingRequest.getShowId() + " and seatId: " + seatId));
             if(showSeat.getStatus()!= SeatStatus.LOCKED) {
                 throw new RuntimeException("Seat with id: " + seatId + " is not locked for booking");
             }
-             showSeat.setStatus(SeatStatus.BOOKED);
-             showSeatRepository.save(showSeat);
+            showSeat.setStatus(SeatStatus.BOOKED);
+            showSeat.setBooking(savedBooking);
+            totalPrice += showSeat.getPrice();
+            showSeatRepository.save(showSeat);
         }
-
-        Double totalPrice = show.getPrice() * bookingRequest.getSeatIds().size();
-        Booking booking = new Booking();
-        booking.setShow(show);
-        booking.setUser(user);
-        booking.setTotalAmount(totalPrice);
-        booking.setStatus(BookingStatus.CONFIRMED);
-        return bookingRepository.save(booking);
+        savedBooking.setTotalAmount(totalPrice);
+         return bookingRepository.save(savedBooking);
     }
 
     public Booking getBookingById(Long bookingId){
@@ -77,11 +82,10 @@ public class BookingService {
             throw new RuntimeException("Only confirmed bookings can be cancelled");
         }
 
-        showSeatRepository.findByShowShowId(booking.getShow().getShowId())
-                .stream()
-                .filter(showSeat -> showSeat.getStatus() == SeatStatus.BOOKED)
+        showSeatRepository.findByBookingBookingId(bookingId)
                 .forEach(showSeat -> {
                     showSeat.setStatus(SeatStatus.AVAILABLE);
+                    showSeat.setBooking(null);
                     showSeatRepository.save(showSeat);
                 });
         booking.setStatus(BookingStatus.CANCELLED);

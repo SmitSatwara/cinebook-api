@@ -20,8 +20,9 @@ public class Movie {
     private String title;
     @Column(nullable = false)
     private String genre;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String language;
+    private Language language;
     @Column(nullable = false)
     private Integer duration;
     @Column

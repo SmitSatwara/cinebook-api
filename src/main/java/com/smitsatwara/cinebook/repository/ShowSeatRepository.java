@@ -11,5 +11,6 @@ public interface ShowSeatRepository extends JpaRepository<ShowSeat,Long> {
     List<ShowSeat> findByShowShowId(Long showId);
     List<ShowSeat> findByShowShowIdAndStatus(Long showId, SeatStatus status);
     Optional<ShowSeat> findByShowShowIdAndSeatSeatId(Long showId, Long seatId);
+    List<ShowSeat> findByBookingBookingId(Long bookingId);
 
 }

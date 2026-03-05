@@ -26,7 +26,7 @@ public class Show {
     private LocalDate showDate;
     @Column(nullable = false)
     private LocalTime showTime;
-    @Column(nullable = false)
+    @Column
     private Double price;
 
 }
