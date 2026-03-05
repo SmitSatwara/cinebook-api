@@ -1,6 +1,7 @@
 package com.smitsatwara.cinebook.service;
 
 import com.smitsatwara.cinebook.dto.ShowRequest;
+import com.smitsatwara.cinebook.dto.ShowResponse;
 import com.smitsatwara.cinebook.model.*;
 import com.smitsatwara.cinebook.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class ShowService {
 
     //admin can create shows and auto create show seats for the show
     @Transactional
-    public Show addShow(ShowRequest showRequest) {
+    public ShowResponse addShow(ShowRequest showRequest) {
 
         if(showRepository.findByScreenScreenIdAndShowDateAndShowTime(
                 showRequest.getScreenId(),
@@ -61,23 +62,27 @@ public class ShowService {
                 )
                 .toList();
         showSeatRepository.saveAll(showSeats);
-        return savedShow;
+        return toShowResponse(savedShow);
     }
     //get all shows for a movie
-    public List<Show> getShowsByMovie(Long movieId, LocalDate showDate) {
-        return showRepository.findByMovieMovieIdAndShowDate(movieId,showDate);
+    public List<ShowResponse> getShowsByMovie(Long movieId, LocalDate showDate) {
+        return showRepository.findByMovieMovieIdAndShowDate(movieId,showDate).stream()
+                .map(this::toShowResponse)
+                .toList();
     }
     //get all shows for a screen
-    public List<Show> getShowsByScreen(Long screenId) {
-        return showRepository.findByScreenScreenId(screenId);
+    public List<ShowResponse> getShowsByScreen(Long screenId) {
+        return showRepository.findByScreenScreenId(screenId)
+                .stream()
+                .map(this::toShowResponse)
+                .toList();
     }
 
-    public List<ShowSeat> getShowSeats(Long showId) {
-        return showSeatRepository.findByShowShowId(showId);
-    }
-
-    public List<Show> getShowsByCityAndMovieAndDate(String city, Long movieId, LocalDate showDate) {
-        return showRepository.findByScreenTheatreCityAndMovieMovieIdAndShowDate(city, movieId, showDate);
+    public List<ShowResponse> getShowsByCityAndMovieAndDate(String city, Long movieId, LocalDate showDate) {
+        return showRepository.findByScreenTheatreCityAndMovieMovieIdAndShowDate(city, movieId, showDate)
+                .stream()
+                .map(this::toShowResponse)
+                .toList();
     }
 
 
@@ -86,5 +91,17 @@ public class ShowService {
         if (showTime.isBefore(LocalTime.of(17, 0))) return 1.0;  // Afternoon
         if (showTime.isBefore(LocalTime.of(21, 0))) return 1.2;  // Evening
         return 1.5;                                               // Night
+    }
+
+    private ShowResponse toShowResponse(Show show) {
+        ShowResponse response = new ShowResponse();
+        response.setShowId(show.getShowId());
+        response.setMovieTitle(show.getMovie().getTitle());
+        response.setTheaterName(show.getScreen().getTheatre().getName());
+        response.setScreenName(show.getScreen().getName());
+        response.setShowDate(show.getShowDate());
+        response.setShowTime(show.getShowTime());
+        response.setPrice(show.getPrice());
+        return response;
     }
 }
