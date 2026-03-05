@@ -23,6 +23,13 @@ public class MovieController {
     public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
         return ResponseEntity.ok( movieService.getMovieById(id));
     }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Movie>> getMoviesByGenre(@RequestParam String genre) {
+        return ResponseEntity.ok(movieService.getMoviesByGenre(genre));
+    }
+
     @PostMapping
     public ResponseEntity<Movie> addMovie(@RequestBody @Valid MovieRequest movieRequest) {
         return ResponseEntity.ok(movieService.addMovie(movieRequest));

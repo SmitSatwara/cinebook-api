@@ -38,6 +38,10 @@ public class MovieService {
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + movieId));
     }
 
+    public List<Movie> getMoviesByGenre(String genre) {
+        return movieRepository.findByGenreIgnoreCase(genre);
+    }
+
     public void deleteMovie(Long movieId) {
         if(!movieRepository.existsById(movieId)){
             throw new RuntimeException("Movie not found with id: " + movieId);
