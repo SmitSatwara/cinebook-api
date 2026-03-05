@@ -1,6 +1,7 @@
 package com.smitsatwara.cinebook.service;
 
 import com.smitsatwara.cinebook.dto.SeatRequest;
+import com.smitsatwara.cinebook.dto.SeatResponse;
 import com.smitsatwara.cinebook.model.Screen;
 import com.smitsatwara.cinebook.model.Seat;
 import com.smitsatwara.cinebook.repository.ScreenRepository;
@@ -16,7 +17,7 @@ public class SeatService {
     private final SeatRepository seatRepository;
     private final ScreenRepository screenRepository;
 
-    public Seat addSeat(SeatRequest seatRequest) {
+    public SeatResponse addSeat(SeatRequest seatRequest) {
 
         Screen screen = screenRepository.findById(seatRequest.getScreenId())
                 .orElseThrow(() -> new RuntimeException("Screen not found with id: " + seatRequest.getScreenId()));
@@ -39,10 +40,25 @@ public class SeatService {
         seat.setSeatNumber(seatRequest.getSeatNumber());
         seat.setSeatType(seatRequest.getSeatType());
         seat.setScreen(screen);
-        return seatRepository.save(seat);
+        seatRepository.save(seat);
+        return toSeatResponse(seat);
     }
 
-    public List<Seat> getSeatsByScreenId(Long screenId) {
-        return seatRepository.findByScreenScreenId(screenId);
+    public List<SeatResponse> getSeatsByScreenId(Long screenId) {
+        return seatRepository.findByScreenScreenId(screenId)
+                .stream()
+                .map(this::toSeatResponse)
+                .toList();
+    }
+
+    private SeatResponse toSeatResponse(Seat seat) {
+        SeatResponse response = new SeatResponse();
+        response.setSeatId(seat.getSeatId());
+        response.setSeatNumber(seat.getSeatNumber());
+        response.setSeatType(seat.getSeatType());
+        response.setScreenName(seat.getScreen().getName());
+        response.setTheaterName(seat.getScreen().getTheatre().getName());
+        response.setCity(seat.getScreen().getTheatre().getCity());
+        return response;
     }
 }
