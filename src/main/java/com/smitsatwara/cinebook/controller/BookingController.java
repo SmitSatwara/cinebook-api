@@ -1,6 +1,7 @@
 package com.smitsatwara.cinebook.controller;
 
 import com.smitsatwara.cinebook.dto.BookingRequest;
+import com.smitsatwara.cinebook.dto.BookingResponse;
 import com.smitsatwara.cinebook.model.Booking;
 import com.smitsatwara.cinebook.service.BookingService;
 import jakarta.validation.Valid;
@@ -18,7 +19,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public ResponseEntity<Booking> bookSeats(@RequestBody @Valid BookingRequest bookingRequest) {
+    public ResponseEntity<BookingResponse> bookSeats(@RequestBody @Valid BookingRequest bookingRequest) {
         String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
@@ -26,12 +27,12 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long bookingId) {
+    public ResponseEntity<BookingResponse> getBookingById(@PathVariable Long bookingId) {
         return ResponseEntity.ok(bookingService.getBookingById(bookingId));
     }
 
     @GetMapping("/my-bookings")
-    public ResponseEntity<List<Booking>> getMyBookings() {
+    public ResponseEntity<List<BookingResponse>> getMyBookings() {
         String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
@@ -39,7 +40,7 @@ public class BookingController {
     }
 
     @PutMapping("/{bookingId}/cancel")
-    public ResponseEntity<Booking> cancelBooking(@PathVariable Long bookingId) {
+    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long bookingId) {
         String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();

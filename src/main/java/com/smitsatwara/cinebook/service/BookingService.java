@@ -1,6 +1,8 @@
 package com.smitsatwara.cinebook.service;
 
 import com.smitsatwara.cinebook.dto.BookingRequest;
+import com.smitsatwara.cinebook.dto.BookingResponse;
+import com.smitsatwara.cinebook.dto.BookingSeatDetail;
 import com.smitsatwara.cinebook.model.*;
 import com.smitsatwara.cinebook.repository.BookingRepository;
 import com.smitsatwara.cinebook.repository.ShowRepository;
@@ -22,7 +24,7 @@ public class BookingService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Booking createBooking(BookingRequest bookingRequest, String email) {
+    public BookingResponse createBooking(BookingRequest bookingRequest, String email) {
         Show show = showRepository.findById(bookingRequest.getShowId())
                 .orElseThrow(() -> new RuntimeException("Show not found with id: " + bookingRequest.getShowId()));
         User user = userRepository.findByEmail(email)
@@ -49,23 +51,28 @@ public class BookingService {
             showSeatRepository.save(showSeat);
         }
         savedBooking.setTotalAmount(totalPrice);
-         return bookingRepository.save(savedBooking);
+        bookingRepository.save(savedBooking);
+        return toBookingResponse(savedBooking);
     }
 
-    public Booking getBookingById(Long bookingId){
-        return bookingRepository.findById(bookingId)
+    public BookingResponse getBookingById(Long bookingId){
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+        return toBookingResponse(booking);
     }
 
 
-    public List<Booking> getBookingByUser(String email){
+    public List<BookingResponse> getBookingByUser(String email){
         User user  =  userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-
-        return bookingRepository.findByUserUserId(user.getUserId());
+        return bookingRepository.findByUserUserId(user.getUserId())
+                .stream()
+                .map(this::toBookingResponse)
+                .toList();
     }
     @Transactional
-    public Booking cancelBooking(Long bookingId, String email){
+    public BookingResponse cancelBooking(Long bookingId, String email){
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
@@ -82,6 +89,8 @@ public class BookingService {
             throw new RuntimeException("Only confirmed bookings can be cancelled");
         }
 
+        BookingResponse response = toBookingResponse(booking);
+
         showSeatRepository.findByBookingBookingId(bookingId)
                 .forEach(showSeat -> {
                     showSeat.setStatus(SeatStatus.AVAILABLE);
@@ -89,6 +98,32 @@ public class BookingService {
                     showSeatRepository.save(showSeat);
                 });
         booking.setStatus(BookingStatus.CANCELLED);
-        return bookingRepository.save(booking);
+        bookingRepository.save(booking);
+        return response;
     }
+
+    private BookingResponse toBookingResponse(Booking booking) {
+        BookingResponse response = new BookingResponse();
+        response.setBookingId(booking.getBookingId());
+        response.setMovieTitle(booking.getShow().getMovie().getTitle());
+        response.setScreenName(booking.getShow().getScreen().getName());
+        response.setShowDate(booking.getShow().getShowDate());
+        response.setShowTime(booking.getShow().getShowTime());
+        response.setTheaterName(booking.getShow().getScreen().getTheatre().getName());
+        response.setBookingStatus(booking.getStatus());
+        response.setTotalPrice(booking.getTotalAmount());
+        List<BookingSeatDetail> seatDetails = showSeatRepository.findByBookingBookingId(booking.getBookingId())
+                .stream()
+                .map(showSeat -> {
+                    BookingSeatDetail seatDetail = new BookingSeatDetail();
+                    seatDetail.setSeatNumber(showSeat.getSeat().getSeatNumber());
+                    seatDetail.setSeatType(showSeat.getSeat().getSeatType());
+                    seatDetail.setPrice(showSeat.getPrice());
+                    return seatDetail;
+                }).toList();
+        response.setSeatDetails(seatDetails);
+        return response;
+    }
+
+
 }
