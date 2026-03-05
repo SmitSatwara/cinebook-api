@@ -15,6 +15,9 @@ public class MovieService {
 
     //admin can add movies
     public Movie addMovie(MovieRequest movieRequest) {
+        if(movieRepository.findByTitleAndLanguage(movieRequest.getTitle(), movieRequest.getLanguage()).isPresent()) {
+            throw new RuntimeException("Movie already exists with the same title and language");
+        }
         Movie movie = new Movie();
         movie.setTitle(movieRequest.getTitle());
         movie.setGenre(movieRequest.getGenre());
