@@ -15,9 +15,7 @@ public class SeatLockCleanupJob {
 
     @Scheduled(fixedRate = 60000)
     public void seatCleanUp(){
-        showSeatRepository.findAll()
-                .stream()
-                .filter(showSeat -> showSeat.getStatus()== SeatStatus.LOCKED)
+        showSeatRepository.findByStatus(SeatStatus.LOCKED)
                 .forEach(   showSeat -> {
                     if(!redisService.isSeatLocked(showSeat.getShow().getShowId(),showSeat.getSeat().getSeatId())){
                         showSeat.setStatus(SeatStatus.AVAILABLE);
