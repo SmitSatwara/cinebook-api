@@ -22,6 +22,7 @@ public class BookingService {
     private final ShowSeatRepository showSeatRepository;
     private final ShowRepository showRepository;
     private final UserRepository userRepository;
+    private final RedisService redisService;
 
     @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest, String email) {
@@ -42,12 +43,16 @@ public class BookingService {
         for(Long seatId : bookingRequest.getSeatIds()){
             ShowSeat showSeat = showSeatRepository.findByShowShowIdAndSeatSeatId(bookingRequest.getShowId(),seatId)
                     .orElseThrow(() -> new RuntimeException("Show seat not found for showId: " + bookingRequest.getShowId() + " and seatId: " + seatId));
+            if(!redisService.isSeatLocked(bookingRequest.getShowId(),seatId)){
+                throw new RuntimeException("Seat with id: " + seatId + " is not locked for booking" + " or lock has expired. Please select the seat again to lock it before booking");
+            }
             if(showSeat.getStatus()!= SeatStatus.LOCKED) {
                 throw new RuntimeException("Seat with id: " + seatId + " is not locked for booking");
             }
             showSeat.setStatus(SeatStatus.BOOKED);
             showSeat.setBooking(savedBooking);
             totalPrice += showSeat.getPrice();
+            redisService.unlockSeat(bookingRequest.getShowId(),seatId); // unlock the seat in redis after booking is confirmed
             showSeatRepository.save(showSeat);
         }
         savedBooking.setTotalAmount(totalPrice);

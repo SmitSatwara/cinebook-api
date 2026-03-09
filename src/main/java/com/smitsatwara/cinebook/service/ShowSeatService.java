@@ -13,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShowSeatService {
     private final ShowSeatRepository showSeatRepository;
+    private final RedisService redisService;
 
     public List<ShowSeatResponse> getShowSeats(Long showId) {
         //need to as ShowSeatResponse as we dont want to expose the show and seat details in the response
@@ -21,6 +22,7 @@ public class ShowSeatService {
                     .map(showSeat -> {
                         ShowSeatResponse response = new ShowSeatResponse();
                         response.setShowSeatId(showSeat.getShowSeatId());
+                        response.setSeatId(showSeat.getSeat().getSeatId());
                         response.setSeatNumber(showSeat.getSeat().getSeatNumber());
                         response.setSeatType(showSeat.getSeat().getSeatType());
                         response.setPrice(showSeat.getPrice());
@@ -36,6 +38,7 @@ public class ShowSeatService {
                 .map(showSeat -> {
                     ShowSeatResponse response = new ShowSeatResponse();
                     response.setShowSeatId(showSeat.getShowSeatId());
+                    response.setSeatId(showSeat.getSeat().getSeatId());
                     response.setSeatNumber(showSeat.getSeat().getSeatNumber());
                     response.setSeatType(showSeat.getSeat().getSeatType());
                     response.setPrice(showSeat.getPrice());
@@ -51,6 +54,7 @@ public class ShowSeatService {
             throw new RuntimeException("Seat is not available for booking");
         }
         showSeat.setStatus(SeatStatus.LOCKED);
+        redisService.lockSeat(showId,seatId);
         return showSeatRepository.save(showSeat);
     }
 
@@ -61,6 +65,7 @@ public class ShowSeatService {
             throw new RuntimeException("Seat is not locked");
         }
         showSeat.setStatus(SeatStatus.AVAILABLE);
+        redisService.unlockSeat(showId,seatId);
         return showSeatRepository.save(showSeat);
     }
 

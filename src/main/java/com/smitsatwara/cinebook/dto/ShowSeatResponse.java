@@ -11,6 +11,7 @@ import lombok.Setter;
 public class ShowSeatResponse {
 
     private Long showSeatId;
+    private Long seatId;
     private String seatNumber;
     private SeatType seatType;
     private double price;
