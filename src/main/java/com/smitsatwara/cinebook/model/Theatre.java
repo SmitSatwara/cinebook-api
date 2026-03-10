@@ -9,7 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "theatres")
+@Table(name = "theatres", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name", "city", "address"})
+})
 public class Theatre {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long theatreId;
