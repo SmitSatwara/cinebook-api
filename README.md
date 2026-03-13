@@ -1,6 +1,9 @@
 # 🎬 CineBook API — Movie Ticket Booking System
 
-A production-ready RESTful backend API for a movie ticket booking platform, built with **Spring Boot 3.5**, **PostgreSQL**, and **Redis**. Features JWT authentication, role-based access control, real-time seat locking, and full Docker support.
+A production-ready RESTful backend API for a movie ticket booking platform, built with **Spring Boot 3.5**, **PostgreSQL**, and **Redis**. Features JWT authentication, role-based access control, real-time seat locking, full Docker support, AWS deployment, and automated CI/CD.
+
+🌐 **Live API:** `http://65.0.205.118:8080`
+📖 **Swagger UI:** `http://65.0.205.118:8080/swagger-ui/index.html`
 
 ---
 
@@ -11,13 +14,16 @@ A production-ready RESTful backend API for a movie ticket booking platform, buil
 - [Architecture](#-architecture)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Option 1: Run with Docker (Recommended)](#option-1-run-with-docker-recommended)
-    - [Option 2: Run Locally with IntelliJ](#option-2-run-locally-with-intellij)
+  - [Prerequisites](#prerequisites)
+  - [Option 1: Run with Docker (Recommended)](#option-1-run-with-docker-recommended)
+  - [Option 2: Run Locally with IntelliJ](#option-2-run-locally-with-intellij)
+- [AWS Deployment](#-aws-deployment)
+- [CI/CD Pipeline](#-cicd-pipeline)
 - [Environment Variables](#-environment-variables)
 - [API Endpoints](#-api-endpoints)
 - [Key Design Decisions](#-key-design-decisions)
 - [Database Schema](#-database-schema)
+- [Roadmap](#-roadmap)
 
 ---
 
@@ -32,6 +38,8 @@ A production-ready RESTful backend API for a movie ticket booking platform, buil
 - **Scheduled Cleanup** — Auto-releases expired seat locks every 60 seconds
 - **Swagger UI** — Interactive API documentation
 - **Docker Support** — Full containerization with multi-stage build
+- **AWS Deployed** — Live on EC2 with RDS PostgreSQL
+- **CI/CD Pipeline** — Auto-deploy to EC2 on every git push via GitHub Actions
 - **Sample Data** — Auto-loaded test data on startup
 
 ---
@@ -42,7 +50,7 @@ A production-ready RESTful backend API for a movie ticket booking platform, buil
 |---|---|
 | Language | Java 17 |
 | Framework | Spring Boot 3.5.11 |
-| Database | PostgreSQL 15 |
+| Database | PostgreSQL 17.6 (AWS RDS) |
 | Cache / Locking | Redis |
 | Authentication | JWT (jjwt 0.11.5) |
 | Security | Spring Security 6 |
@@ -50,12 +58,15 @@ A production-ready RESTful backend API for a movie ticket booking platform, buil
 | API Docs | SpringDoc OpenAPI (Swagger UI) |
 | Build Tool | Maven |
 | Containerization | Docker + Docker Compose |
+| Cloud | AWS EC2 + RDS |
+| CI/CD | GitHub Actions |
 | Code Generation | Lombok |
 
 ---
 
 ## 🏗 Architecture
 
+### Local Development
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    Client (Postman / Frontend)      │
@@ -71,6 +82,31 @@ A production-ready RESTful backend API for a movie ticket booking platform, buil
 │                    ▼                    ▼           │
 │             PostgreSQL 15           Redis           │
 │          (persistent data)     (seat locking)       │
+└─────────────────────────────────────────────────────┘
+```
+
+### AWS Production Architecture
+```
+┌─────────────────────────────────────────────────────┐
+│                     Internet                        │
+└─────────────────────┬───────────────────────────────┘
+                      │ HTTP :8080
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│           EC2 (cinebook-api-server)                 │
+│           65.0.205.118 | t3.micro | Ubuntu 24.04    │
+│                                                     │
+│   ┌─────────────────────┐  ┌──────────────────┐     │
+│   │  Spring Boot App    │  │  Redis Container │     │
+│   │  (Docker :8080)     │  │  (Docker :6379)  │     │
+│   └──────────┬──────────┘  └──────────────────┘     │
+└──────────────┼──────────────────────────────────────┘
+               │ PostgreSQL :5432
+               ▼
+┌─────────────────────────────────────────────────────┐
+│           AWS RDS (cinebook-db)                     │
+│           PostgreSQL 17.6 | db.t4g.micro            │
+│           Mumbai (ap-south-1)                       │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -139,6 +175,10 @@ src/main/java/com/smitsatwara/cinebook/
 src/main/resources/
 ├── application.properties
 └── data.sql            (sample data — auto loaded on startup)
+
+.github/
+└── workflows/
+    └── deploy.yml      (GitHub Actions CI/CD pipeline)
 ```
 
 ---
@@ -213,19 +253,110 @@ http://localhost:8080/swagger-ui/index.html
 
 ---
 
+## ☁️ AWS Deployment
+
+The application is deployed on AWS using EC2 and RDS.
+
+### Infrastructure
+
+| Component | Service | Details |
+|---|---|---|
+| Application Server | EC2 t3.micro | Ubuntu 24.04, 20GB, Mumbai region |
+| Database | RDS PostgreSQL 17.6 | db.t4g.micro, managed, Mumbai region |
+| Cache | Redis (Docker on EC2) | Running as container alongside the app |
+| Public IP | 65.0.205.118 | App accessible on port 8080 |
+
+### Why RDS Instead of PostgreSQL on EC2?
+
+| Factor | PostgreSQL on EC2 | AWS RDS |
+|---|---|---|
+| Backups | Manual | Automatic (AWS handles it) |
+| Updates | Manual | Automatic (AWS handles it) |
+| If EC2 crashes | Data lost ❌ | Data safe ✅ |
+| High Availability | No | Yes |
+
+### SSH into EC2
+
+```bash
+ssh -i cinebook-key.pem ubuntu@65.0.205.118
+```
+
+> ⚠️ `application.properties` is in `.gitignore` and is NOT pushed to GitHub.
+> It is created directly on EC2 with production credentials. Git pull never deletes it because it is not tracked by git.
+
+---
+
+## 🔄 CI/CD Pipeline
+
+Every push to the `main` branch automatically deploys to EC2 using **GitHub Actions**. No manual SSH required.
+
+### How It Works
+
+```
+git push origin main
+        ↓
+GitHub Actions triggers deploy.yml
+        ↓
+Spins up ubuntu-latest runner
+        ↓
+SSHs into EC2 using GitHub Secrets
+        ↓
+git pull → docker-compose up --build -d
+        ↓
+App live at http://65.0.205.118:8080 ✅
+```
+
+### deploy.yml
+
+```yaml
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd ~/cinebook-api
+            git pull origin main
+            docker-compose up --build -d
+```
+
+### GitHub Secrets Required
+
+| Secret | Description |
+|---|---|
+| `EC2_HOST` | Public IP of EC2 instance (`65.0.205.118`) |
+| `EC2_USER` | SSH username (`ubuntu`) |
+| `EC2_KEY` | Full contents of `cinebook-key.pem` |
+
+---
+
 ## ⚙️ Environment Variables
 
-When running via Docker, these environment variables override `application.properties`:
+When running via Docker on AWS, these environment variables override `application.properties`:
 
-| Variable | Value | Description |
-|---|---|---|
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://postgres:5432/cinebook_db` | PostgreSQL connection (uses service name) |
-| `SPRING_DATASOURCE_USERNAME` | `postgres` | DB username |
-| `SPRING_DATASOURCE_PASSWORD` | `1234` | DB password |
-| `SPRING_DATA_REDIS_HOST` | `redis` | Redis host (uses service name) |
-| `SPRING_DATA_REDIS_PORT` | `6379` | Redis port |
+| Variable | Description |
+|---|---|
+| `SPRING_DATASOURCE_URL` | RDS PostgreSQL JDBC URL |
+| `SPRING_DATASOURCE_USERNAME` | DB username |
+| `SPRING_DATASOURCE_PASSWORD` | DB password |
+| `SPRING_DATA_REDIS_HOST` | Redis host (uses Docker service name `redis`) |
+| `SPRING_DATA_REDIS_PORT` | Redis port (6379) |
+| `JWT_SECRET` | Base64 encoded JWT signing key |
+| `JWT_EXPIRATION` | Token expiry in ms (86400000 = 24 hours) |
 
-For local development, `application.properties` uses `localhost` for both postgres and redis.
+> 🔒 Never commit `application.properties` to GitHub. All secrets are managed via environment variables or GitHub Secrets.
 
 ---
 
@@ -252,28 +383,32 @@ For local development, `application.properties` uses `localhost` for both postgr
 |---|---|---|---|
 | GET | `/api/theatres` | Public | Get all theatres |
 | POST | `/api/theatres` | ADMIN | Add theatre |
+| GET | `/api/theatres/city/{city}` | Public | Get theatres by city |
 | GET | `/api/screens` | Public | Get all screens |
 | POST | `/api/screens` | ADMIN | Add screen |
+| GET | `/api/screens/theatre/{theatreId}` | Public | Get screens by theatre |
 
 ### Shows
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | GET | `/api/shows` | Public | Get all shows |
 | POST | `/api/shows` | ADMIN | Create show |
+| GET | `/api/shows/movie/{movieId}` | Public | Get shows by movie |
+| GET | `/api/shows/city/{city}/movie/{movieId}` | Public | Get shows by city and movie |
 
 ### Seat Locking & Booking
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | GET | `/api/show-seats/{showId}` | USER | Get seats for a show |
 | GET | `/api/show-seats/{showId}/available` | USER | Get available seats |
-| POST | `/api/show-seats/lock` | USER | Lock a seat (10 min TTL) |
-| POST | `/api/show-seats/unlock` | USER | Unlock a seat |
+| PUT | `/api/show-seats/{showId}/{seatId}/lock` | USER | Lock a seat (10 min TTL) |
+| PUT | `/api/show-seats/{showId}/{seatId}/unlock` | USER | Unlock a seat |
 | POST | `/api/bookings` | USER | Create booking |
-| GET | `/api/bookings/{id}` | USER | Get booking by ID |
-| GET | `/api/bookings/user` | USER | Get my bookings |
-| PUT | `/api/bookings/{id}/cancel` | USER | Cancel booking |
+| GET | `/api/bookings/{bookingId}` | USER | Get booking by ID |
+| GET | `/api/bookings/my-bookings` | USER | Get my bookings |
+| PUT | `/api/bookings/{bookingId}/cancel` | USER | Cancel booking |
 
-> 💡 Use Swagger UI at `http://localhost:8080/swagger-ui/index.html` for interactive API testing.
+> 💡 Use Swagger UI at `http://65.0.205.118:8080/swagger-ui/index.html` for interactive API testing.
 
 ---
 
@@ -309,6 +444,9 @@ All protected endpoints require a `Bearer` token in the `Authorization` header. 
 ### 6. Response DTOs
 All API responses use dedicated DTO classes instead of returning entity objects directly. This prevents circular references, hides sensitive fields, and decouples the API contract from the database schema.
 
+### 7. Secrets Management
+`application.properties` is in `.gitignore` and never pushed to GitHub. Production secrets are passed as environment variables in `docker-compose.yml` on EC2. CI/CD secrets are stored as encrypted GitHub Secrets.
+
 ---
 
 ## 🗄 Database Schema
@@ -342,10 +480,9 @@ theatres ──< screens ──< seats
 | Redis Seat Locking | ✅ Done |
 | Docker + docker-compose | ✅ Done |
 | Swagger UI | ✅ Done |
-| Unit Tests (JUnit 5 + Mockito) | 🔄 In Progress |
-| AWS Deployment (EC2 + RDS + ElastiCache) | 🔄 In Progress |
-| CI/CD Pipeline (GitHub Actions) | 📅 Planned |
+| AWS Deployment (EC2 + RDS) | ✅ Done |
+| CI/CD Pipeline (GitHub Actions) | ✅ Done |
+| Database Indexes + Pagination | 📅 Planned |
 | Payment Integration (Razorpay) | 📅 Planned |
-| Pagination & Indexes | 📅 Planned |
 
 ---
