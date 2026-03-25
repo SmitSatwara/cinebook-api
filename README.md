@@ -2,8 +2,8 @@
 
 A production-ready RESTful backend API for a movie ticket booking platform, built with **Spring Boot 3.5**, **PostgreSQL**, and **Redis**. Features JWT authentication, role-based access control, real-time seat locking, full Docker support, AWS deployment, and automated CI/CD.
 
-🌐 **Live API:** `http://65.0.205.118:8080`
-📖 **Swagger UI:** `http://65.0.205.118:8080/swagger-ui/index.html`
+🌐 **Live API:** [http://65.0.205.118:8080](http://65.0.205.118:8080)
+📖 **Swagger UI:** [http://65.0.205.118:8080/swagger-ui/index.html](http://65.0.205.118:8080/swagger-ui/index.html)
 
 ---
 
