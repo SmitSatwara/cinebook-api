@@ -3,6 +3,7 @@
 A production-ready RESTful backend API for a movie ticket booking platform, built with **Spring Boot 3.5**, **PostgreSQL**, and **Redis**. Features JWT authentication, role-based access control, real-time seat locking, full Docker support, AWS deployment, and automated CI/CD.
 
 🌐 AWS deployment paused to avoid costs. To run locally, see Getting Started section below.
+
 ---
 
 ## 📌 Table of Contents
