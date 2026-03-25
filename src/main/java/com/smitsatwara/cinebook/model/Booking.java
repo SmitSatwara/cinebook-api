@@ -9,7 +9,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter@Setter@NoArgsConstructor
-@Table(name = "bookings")
+@Table(
+        name = "bookings",
+        indexes = {
+                @Index(name = "idx_booking_user_id", columnList = "user_id")
+        }
+)
 public class Booking {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;

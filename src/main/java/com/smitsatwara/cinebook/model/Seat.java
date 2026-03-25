@@ -8,7 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "seats")
+@Table(
+        name = "seats",
+        indexes = {
+                @Index(name="idx_seats_screen_id",columnList = "screen_id")
+        }
+)
 public class Seat {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long seatId;

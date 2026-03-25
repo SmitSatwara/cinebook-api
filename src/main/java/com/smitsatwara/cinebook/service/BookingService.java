@@ -36,23 +36,23 @@ public class BookingService {
         booking.setUser(user);
         booking.setTotalAmount(0.0);
         booking.setStatus(BookingStatus.CONFIRMED);
-        Booking savedBooking =  bookingRepository.save(booking); // bookingId is generated after saving, so we need to save the booking first before updating show seats with booking reference
+        Booking savedBooking = bookingRepository.save(booking); // bookingId is generated after saving, so we need to save the booking first before updating show seats with booking reference
 
         //now link the booked show seats to the booking
         double totalPrice = 0.0;
-        for(Long seatId : bookingRequest.getSeatIds()){
-            ShowSeat showSeat = showSeatRepository.findByShowShowIdAndSeatSeatId(bookingRequest.getShowId(),seatId)
+        for (Long seatId : bookingRequest.getSeatIds()) {
+            ShowSeat showSeat = showSeatRepository.findByShowShowIdAndSeatSeatId(bookingRequest.getShowId(), seatId)
                     .orElseThrow(() -> new RuntimeException("Show seat not found for showId: " + bookingRequest.getShowId() + " and seatId: " + seatId));
-            if(!redisService.isSeatLocked(bookingRequest.getShowId(),seatId)){
+            if (!redisService.isSeatLocked(bookingRequest.getShowId(), seatId)) {
                 throw new RuntimeException("Seat with id: " + seatId + " is not locked for booking" + " or lock has expired. Please select the seat again to lock it before booking");
             }
-            if(showSeat.getStatus()!= SeatStatus.LOCKED) {
+            if (showSeat.getStatus() != SeatStatus.LOCKED) {
                 throw new RuntimeException("Seat with id: " + seatId + " is not locked for booking");
             }
             showSeat.setStatus(SeatStatus.BOOKED);
             showSeat.setBooking(savedBooking);
             totalPrice += showSeat.getPrice();
-            redisService.unlockSeat(bookingRequest.getShowId(),seatId); // unlock the seat in redis after booking is confirmed
+            redisService.unlockSeat(bookingRequest.getShowId(), seatId); // unlock the seat in redis after booking is confirmed
             showSeatRepository.save(showSeat);
         }
         savedBooking.setTotalAmount(totalPrice);
@@ -60,15 +60,15 @@ public class BookingService {
         return toBookingResponse(savedBooking);
     }
 
-    public BookingResponse getBookingById(Long bookingId){
+    public BookingResponse getBookingById(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
         return toBookingResponse(booking);
     }
 
 
-    public List<BookingResponse> getBookingByUser(String email){
-        User user  =  userRepository.findByEmail(email)
+    public List<BookingResponse> getBookingByUser(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         return bookingRepository.findByUserUserId(user.getUserId())
                 .stream()
@@ -76,7 +76,7 @@ public class BookingService {
                 .toList();
     }
     @Transactional
-    public BookingResponse cancelBooking(Long bookingId, String email){
+    public BookingResponse cancelBooking(Long bookingId, String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
@@ -86,11 +86,11 @@ public class BookingService {
 
         LocalDateTime showTime = LocalDateTime.of(booking.getShow().getShowDate(), booking.getShow().getShowTime());
 
-        if(LocalDateTime.now().isAfter(showTime.minusHours(24))) {
+        if (LocalDateTime.now().isAfter(showTime.minusHours(24))) {
             throw new RuntimeException("Bookings can only be cancelled at least 24 hours before the show time");
         }
 
-        if(booking.getStatus()== BookingStatus.CANCELLED || booking.getStatus()== BookingStatus.PENDING) {
+        if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.PENDING) {
             throw new RuntimeException("Only confirmed bookings can be cancelled");
         }
 

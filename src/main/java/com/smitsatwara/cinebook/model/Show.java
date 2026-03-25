@@ -12,7 +12,13 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "shows")
+@Table(
+        name = "shows",
+        indexes = {
+                @Index(name = "idx_shows_movie_id", columnList = "movie_id"),
+                @Index(name = "idx_show_screen_id", columnList = "screen_id")
+        }
+)
 public class Show {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long showId;
